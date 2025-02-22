@@ -122,6 +122,7 @@ const AudioGallery = () => {
                   <button
                     onClick={() => setSelectedAudio(null)}
                     className="text-white hover:text-gray-300"
+                    aria-label="Close"
                   >
                     <ChevronLeft className="w-8 h-8" />
                   </button>
@@ -137,6 +138,7 @@ const AudioGallery = () => {
                       whileTap={{ scale: 0.9 }}
                       className="w-20 h-20 rounded-full bg-white/10 backdrop-blur-lg flex items-center justify-center text-white hover:bg-white/20"
                       onClick={togglePlay}
+                      aria-label={isPlaying ? "Pause" : "Play"}
                     >
                       {isPlaying ? (
                         <Pause className="w-8 h-8" />

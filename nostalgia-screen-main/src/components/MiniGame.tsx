@@ -1,7 +1,6 @@
-
 import { useEffect, useState, useCallback, useRef } from 'react';
 
-export const MiniGame = () => {
+export const MiniGame = ({ onClose }: { onClose: () => void }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [score, setScore] = useState(0);
   const [isJumping, setIsJumping] = useState(false);
@@ -44,8 +43,13 @@ export const MiniGame = () => {
       if (scoreIntervalRef.current) {
         clearInterval(scoreIntervalRef.current);
       }
+      const username = localStorage.getItem("username") || "Anonymous";
+      const leaderboard = JSON.parse(localStorage.getItem("leaderboard") || "[]");
+      leaderboard.push({ username, score });
+      leaderboard.sort((a: any, b: any) => b.score - a.score);
+      localStorage.setItem("leaderboard", JSON.stringify(leaderboard.slice(0, 10)));
     }
-  }, [isJumping]);
+  }, [isJumping, score]);
 
   useEffect(() => {
     if (isPlaying) {
@@ -126,6 +130,12 @@ export const MiniGame = () => {
             className="bg-white text-museum-tile px-4 py-2 rounded hover:bg-opacity-90 transition-colors"
           >
             Play Again
+          </button>
+          <button
+            onClick={onClose}
+            className="mt-2 bg-white text-museum-tile px-4 py-2 rounded hover:bg-opacity-90 transition-colors"
+          >
+            Close
           </button>
         </div>
       )}
