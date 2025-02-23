@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
 
 @tailwind base;
@@ -59,5 +58,14 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  body.dark {
+    --background: #121212;
+    --foreground: #ffffff;
+    --primary: #bb86fc;
+    --secondary: #03dac6;
+    --accent: #03dac6;
+    --muted: #121212;
+    --border: #333333;
   }
 }

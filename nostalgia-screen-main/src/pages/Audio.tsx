@@ -1,181 +1,212 @@
-import { ChevronLeft, Play, Pause, Volume2, Disc, Waves } from "lucide-react";
+import { ChevronLeft, Play, Pause, Volume2, Disc, Waves, X } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useAudioPlayer } from "../hooks/useAudioPlayer"; // Corrected path
+import { useState, useCallback, Suspense } from "react";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
+import { useAudioPlayer } from "../hooks/useAudioPlayer";
 
-type AudioItem = {
+// Types
+interface AudioItem {
   id: number;
   title: string;
+  artist: string;
   description: string;
   date: string;
   duration: string;
   audioUrl: string;
-  waveform?: number[];
-};
+  waveform: number[];
+  ambianceColor: string;
+}
 
+// Enhanced mock data
 const mockAudios: AudioItem[] = [
   {
     id: 1,
-    title: "Artist Statement",
-    description: "A personal narrative about the artistic journey and creative process.",
+    title: "Whispers of Canvas",
+    artist: "Elena Voss",
+    description: "A sonic exploration of paint meeting canvas in sacred silence.",
     date: "2024",
     duration: "3:45",
     audioUrl: "#",
     waveform: [20, 40, 30, 50, 35, 45, 30, 60, 40],
+    ambianceColor: "from-indigo-900/70 to-purple-900/70",
   },
   {
     id: 2,
-    title: "Studio Sounds",
-    description: "Ambient recording from the creative process.",
+    title: "Metallic Reverie",
+    artist: "Jonah Kael",
+    description: "Sculptural resonance captured in an abandoned foundry.",
     date: "2023",
     duration: "5:20",
     audioUrl: "#",
     waveform: [10, 30, 20, 40, 25, 35, 20, 50, 30],
+    ambianceColor: "from-gray-900/70 to-blue-900/70",
   },
-  // Add more mock data...
 ];
 
 const AudioGallery = () => {
   const [selectedAudio, setSelectedAudio] = useState<AudioItem | null>(null);
-  const { isPlaying, togglePlay, progress, currentTime } = useAudioPlayer(selectedAudio?.audioUrl);
+  const { isPlaying, togglePlay, progress, currentTime, volume, setVolume } = useAudioPlayer(selectedAudio?.audioUrl);
+  const controls = useAnimation();
+
+  const handleSelectAudio = useCallback((audio: AudioItem) => {
+    setSelectedAudio(audio);
+    controls.start({ opacity: 1, scale: 1 });
+  }, [controls]);
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen w-full bg-black px-4 py-8 md:px-8"
+      className="min-h-screen w-full bg-black font-sans text-white overflow-hidden"
     >
-      <header className="mb-8">
-        <div className="flex items-center gap-4">
-          <Link to="/" className="text-white hover:opacity-80">
-            <ChevronLeft className="w-6 h-6" />
+      {/* Header */}
+      <header className="fixed top-0 left-0 right-0 z-20 px-8 py-6 bg-gradient-to-b from-black/80 to-transparent">
+        <div className="flex items-center justify-between max-w-7xl mx-auto">
+          <Link to="/" className="group flex items-center gap-2">
+            <ChevronLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
+            <h1 className="text-3xl font-light tracking-wider">Aural Exhibits</h1>
           </Link>
-          <h1 className="text-white font-serif text-4xl">Sonic Gallery</h1>
         </div>
       </header>
 
-      <motion.div
-        layout
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-8"
-      >
-        {mockAudios.map((audio) => (
-          <motion.div
-            key={audio.id}
-            layoutId={audio.id.toString()}
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 100 }}
-            className="relative group bg-gradient-to-br from-purple-900/50 to-blue-900/50 p-6 rounded-2xl cursor-pointer hover:shadow-2xl transition-all"
-            onClick={() => setSelectedAudio(audio)}
-          >
-            <div className="absolute inset-0 bg-noise opacity-20 rounded-2xl" />
-            <div className="relative z-10">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                className="flex items-center gap-4 mb-4"
-              >
-                <div className="relative w-16 h-16 flex items-center justify-center">
-                  <Disc className="w-12 h-12 text-white/30 animate-spin-slow" />
-                  <Volume2 className="absolute w-6 h-6 text-white" />
+      {/* Gallery Grid */}
+      <div className="pt-24 pb-16 px-8 max-w-7xl mx-auto">
+        <motion.div
+          layout
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12"
+        >
+          {mockAudios.map((audio) => (
+            <motion.div
+              key={audio.id}
+              layoutId={`audio-${audio.id}`}
+              whileHover={{ y: -10 }}
+              className={`relative group bg-gradient-to-br ${audio.ambianceColor} p-6 rounded-xl cursor-pointer overflow-hidden`}
+              onClick={() => handleSelectAudio(audio)}
+            >
+              <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 mix-blend-overlay" />
+              <div className="relative z-10 space-y-4">
+                <div className="flex items-center gap-4">
+                  <motion.div
+                    animate={selectedAudio?.id === audio.id && isPlaying ? { rotate: 360 } : { rotate: 0 }}
+                    transition={{ duration: 2, repeat: isPlaying ? Infinity : 0, ease: "linear" }}
+                    className="w-12 h-12 flex items-center justify-center"
+                  >
+                    <Disc className="w-10 h-10 text-white/40" />
+                  </motion.div>
+                  <div>
+                    <h3 className="text-xl font-medium tracking-tight">{audio.title}</h3>
+                    <p className="text-sm text-white/70">{audio.artist}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-white text-xl font-medium">{audio.title}</h3>
-                  <p className="text-gray-400">{audio.duration}</p>
-                </div>
-              </motion.div>
-              <div className="h-24 overflow-hidden">
-                <p className="text-gray-300 line-clamp-3">{audio.description}</p>
-              </div>
-              <div className="mt-4 h-12 bg-black/30 rounded-lg p-2">
-                <div className="flex gap-1 h-full items-end">
-                  {audio.waveform?.map((height, index) => (
+                <p className="text-white/80 text-sm line-clamp-2">{audio.description}</p>
+                <motion.div className="h-10 flex gap-1 items-end">
+                  {audio.waveform.map((height, i) => (
                     <motion.div
-                      key={index}
-                      className="w-2 bg-purple-400 rounded-t"
-                      initial={{ height: 0 }}
-                      animate={{ height: `${height}%` }}
-                      transition={{ delay: index * 0.05 }}
+                      key={i}
+                      className="w-1.5 bg-white/60 rounded-t-full"
+                      animate={{ height: selectedAudio?.id === audio.id && isPlaying ? [height, height * 1.5, height] : height }}
+                      transition={{ duration: 0.5, repeat: isPlaying ? Infinity : 0, delay: i * 0.05 }}
                     />
                   ))}
-                </div>
+                </motion.div>
               </div>
-            </div>
-          </motion.div>
-        ))}
-      </motion.div>
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
 
+      {/* Audio Player Modal */}
       <AnimatePresence>
         {selectedAudio && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 z-50"
-            onClick={() => setSelectedAudio(null)}
+            className="fixed inset-0 bg-black/95 backdrop-blur-2xl z-50 flex items-center justify-center p-8"
           >
             <motion.div
-              layoutId={selectedAudio.id.toString()}
-              className="max-w-4xl w-full bg-gradient-to-br from-gray-900 to-black rounded-3xl shadow-2xl overflow-hidden"
+              layoutId={`audio-${selectedAudio.id}`}
+              className={`w-full max-w-4xl bg-gradient-to-br ${selectedAudio.ambianceColor} rounded-2xl shadow-2xl`}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="p-8 space-y-6">
+              <div className="p-8 space-y-8">
+                {/* Header */}
                 <div className="flex justify-between items-start">
-                  <div>
-                    <h2 className="text-3xl text-white font-serif">
+                  <div className="space-y-2">
+                    <motion.h2
+                      initial={{ y: 20, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      className="text-4xl font-light tracking-wide"
+                    >
                       {selectedAudio.title}
-                    </h2>
-                    <p className="text-gray-400">{selectedAudio.date}</p>
+                    </motion.h2>
+                    <p className="text-white/70">{selectedAudio.artist} • {selectedAudio.date}</p>
                   </div>
                   <button
                     onClick={() => setSelectedAudio(null)}
-                    className="text-white hover:text-gray-300"
-                    aria-label="Close"
+                    className="p-2 hover:bg-white/10 rounded-full"
+                    aria-label="Close player"
                   >
-                    <ChevronLeft className="w-8 h-8" />
+                    <X className="w-6 h-6" />
                   </button>
                 </div>
 
-                <div className="relative h-48 bg-black/30 rounded-xl overflow-hidden">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Waves className="w-24 h-24 text-white/10" />
-                  </div>
-                  <div className="relative z-10 flex items-center justify-center h-full">
+                {/* Player Controls */}
+                <div className="space-y-6">
+                  <div className="relative h-40 flex items-center justify-center">
+                    <motion.div
+                      className="absolute inset-0"
+                      animate={{ opacity: isPlaying ? 0.2 : 0.1 }}
+                      transition={{ duration: 1, repeat: Infinity, repeatType: "reverse" }}
+                    >
+                      <Waves className="w-full h-full text-white/10" />
+                    </motion.div>
                     <motion.button
                       whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      className="w-20 h-20 rounded-full bg-white/10 backdrop-blur-lg flex items-center justify-center text-white hover:bg-white/20"
+                      whileTap={{ scale: 0.95 }}
+                      className="relative z-10 w-16 h-16 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20"
                       onClick={togglePlay}
-                      aria-label={isPlaying ? "Pause" : "Play"}
                     >
-                      {isPlaying ? (
-                        <Pause className="w-8 h-8" />
-                      ) : (
-                        <Play className="w-8 h-8 pl-1" />
-                      )}
+                      {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 pl-1" />}
                     </motion.button>
                   </div>
-                </div>
 
-                <div className="space-y-4">
-                  <div className="h-1 bg-white/10 rounded-full">
-                    <motion.div
-                      className="h-full bg-purple-400 rounded-full"
-                      initial={{ width: 0 }}
-                      animate={{ width: `${progress * 100}%` }}
-                      transition={{ duration: 0.2 }}
-                    />
+                  {/* Progress and Volume */}
+                  <div className="space-y-4">
+                    <div className="h-1 bg-white/20 rounded-full overflow-hidden">
+                      <motion.div
+                        className="h-full bg-white rounded-full"
+                        animate={{ width: `${progress * 100}%` }}
+                        transition={{ duration: 0.1 }}
+                      />
+                    </div>
+                    <div className="flex justify-between items-center text-sm text-white/70">
+                      <span>{formatTime(currentTime)}</span>
+                      <div className="flex items-center gap-2">
+                        <Volume2 className="w-4 h-4" />
+                        <input
+                          type="range"
+                          min="0"
+                          max="1"
+                          step="0.01"
+                          value={volume}
+                          onChange={(e) => setVolume(parseFloat(e.target.value))}
+                          className="w-20 accent-white"
+                        />
+                      </div>
+                      <span>{selectedAudio.duration}</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between text-gray-400">
-                    <span>{formatTime(currentTime)}</span>
-                    <span>{selectedAudio.duration}</span>
-                  </div>
-                </div>
 
-                <p className="text-gray-300 text-lg">
-                  {selectedAudio.description}
-                </p>
+                  <motion.p
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="text-white/90 text-lg leading-relaxed"
+                  >
+                    {selectedAudio.description}
+                  </motion.p>
+                </div>
               </div>
             </motion.div>
           </motion.div>
@@ -185,8 +216,8 @@ const AudioGallery = () => {
   );
 };
 
-// Helper function to format time
-const formatTime = (seconds: number) => {
+// Time formatting utility
+const formatTime = (seconds: number): string => {
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = Math.floor(seconds % 60);
   return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;

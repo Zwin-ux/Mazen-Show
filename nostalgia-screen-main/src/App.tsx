@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,6 +9,7 @@ import Photos from "./pages/Photos";
 import Videos from "./pages/Videos";
 import Audio from "./pages/Audio";
 import NotFound from "./pages/NotFound";
+import DarkModeToggle from "@/components/DarkModeToggle";
 
 const queryClient = new QueryClient();
 
@@ -19,6 +19,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <DarkModeToggle />
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/home" element={<Index />} />
