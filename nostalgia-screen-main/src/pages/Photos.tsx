@@ -5,7 +5,7 @@ import { OrbitControls, useGLTF } from "@react-three/drei";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-const PhotoBox = () => {
+const Photos = () => {
   const [photos, setPhotos] = useState([
     "/images/photo1.png",
     "/images/photo2.png",
@@ -73,4 +73,4 @@ const PhotoBoxModel = () => {
   return <primitive object={scene} scale={2} position={[0, -1, 0]} />;
 };
 
-export default PhotoBox;
+export default Photos;

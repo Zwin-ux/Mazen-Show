@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { PublicChat } from "@/components/PublicChat";
 import { User, MessageSquare, X, Image, Video, Music } from "lucide-react";

@@ -2,7 +2,7 @@ import { ChevronLeft, Play, Pause, Volume2, Disc, Waves } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAudioPlayer } from "../../hooks/useAudioPlayer"; // Ensure this path is correct
+import { useAudioPlayer } from "../hooks/useAudioPlayer"; // Corrected path
 
 type AudioItem = {
   id: number;
@@ -23,6 +23,15 @@ const mockAudios: AudioItem[] = [
     duration: "3:45",
     audioUrl: "#",
     waveform: [20, 40, 30, 50, 35, 45, 30, 60, 40],
+  },
+  {
+    id: 2,
+    title: "Studio Sounds",
+    description: "Ambient recording from the creative process.",
+    date: "2023",
+    duration: "5:20",
+    audioUrl: "#",
+    waveform: [10, 30, 20, 40, 25, 35, 20, 50, 30],
   },
   // Add more mock data...
 ];
@@ -127,6 +136,7 @@ const AudioGallery = () => {
                     <ChevronLeft className="w-8 h-8" />
                   </button>
                 </div>
+
                 <div className="relative h-48 bg-black/30 rounded-xl overflow-hidden">
                   <div className="absolute inset-0 flex items-center justify-center">
                     <Waves className="w-24 h-24 text-white/10" />
@@ -135,27 +145,37 @@ const AudioGallery = () => {
                     <motion.button
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
-                      className="w-20 h-20 rounded-full bg-primary/10 backdrop-blur-lg flex items-center justify-center text-primary hover:bg-primary/20"
+                      className="w-20 h-20 rounded-full bg-white/10 backdrop-blur-lg flex items-center justify-center text-white hover:bg-white/20"
                       onClick={togglePlay}
+                      aria-label={isPlaying ? "Pause" : "Play"}
                     >
-                      {isPlaying ? <Pause className="w-10 h-10" /> : <Play className="w-10 h-10" />}
+                      {isPlaying ? (
+                        <Pause className="w-8 h-8" />
+                      ) : (
+                        <Play className="w-8 h-8 pl-1" />
+                      )}
                     </motion.button>
                   </div>
                 </div>
-                <div className="mt-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-400">{formatTime(currentTime)}</span>
-                    <span className="text-gray-400">{formatTime(selectedAudio.duration)}</span>
-                  </div>
-                  <div className="relative h-2 bg-gray-700 rounded-full overflow-hidden">
+
+                <div className="space-y-4">
+                  <div className="h-1 bg-white/10 rounded-full">
                     <motion.div
-                      className="absolute top-0 left-0 h-full bg-primary"
-                      style={{ width: `${progress * 100}%` }}
+                      className="h-full bg-purple-400 rounded-full"
                       initial={{ width: 0 }}
                       animate={{ width: `${progress * 100}%` }}
+                      transition={{ duration: 0.2 }}
                     />
                   </div>
+                  <div className="flex justify-between text-gray-400">
+                    <span>{formatTime(currentTime)}</span>
+                    <span>{selectedAudio.duration}</span>
+                  </div>
                 </div>
+
+                <p className="text-gray-300 text-lg">
+                  {selectedAudio.description}
+                </p>
               </div>
             </motion.div>
           </motion.div>
@@ -163,6 +183,13 @@ const AudioGallery = () => {
       </AnimatePresence>
     </motion.div>
   );
+};
+
+// Helper function to format time
+const formatTime = (seconds: number) => {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 };
 
 export default AudioGallery;
