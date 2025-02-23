@@ -16,11 +16,11 @@ export default function Landing() {
 
   useEffect(() => {
     const storedLeaderboard = JSON.parse(localStorage.getItem("leaderboard") || "[]");
-    setLeaderboard(storedLeaderboard.sort((a, b) => b.score - a.score).slice(0, 5));
+    setLeaderboard(storedLeaderboard.sort((a, b) => b.score - a.score).slice(0, 5)); // Top 5, sorted
   }, []);
 
   useEffect(() => {
-    inputRef.current?.focus();
+    inputRef.current?.focus(); // Auto-focus input on load
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
